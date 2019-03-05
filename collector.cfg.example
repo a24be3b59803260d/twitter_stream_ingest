@@ -5,7 +5,7 @@ consumer_key = TWITTER_CONSUMER_KEY
 consumer_secret = TWITTER_CONSUMER_SECRET
 
 [io]
-outfile = /tmp/maga_qanon
+outfile = /tmp/twitter_archive
 target_count = 10000
-tracker_string = #MAGA,#Qanon
+tracker_string = #interesting,#tweets
 
