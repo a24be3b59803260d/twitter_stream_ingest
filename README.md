@@ -21,7 +21,21 @@ From the virtual environment run the app with python.
 rolling new file at /tmp/maga_qanon_20190304-123240_raw_tweets.jsonl
 [...]
 ```
-Using **screen** or **nohup** will allow the collector script to run unattended. 
+Using **screen** or **nohup** will allow the collector script to run unattended.
+
+# AWS S3 Integration
+Output may be directed to AWS S3 instead of the local disk (enabling use of a tiny collector VM) by adding the **s3_bucketname** key to the __[io]__ section of the __collector.cfg__ file and configuring local AWS credentials that have permission to write to the specified bucket. The value of the __s3_bucketname__ key should be the bucket name without the ARN prefix.
+
+AWS CLI configuration steps can be found here: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
+
+An example updated __[io]__ section appears below:
+```
+[io]
+outfile = /tmp/twitter_archive/interesting_tweets
+target_count = 1000
+tracker_string = #interesting,#tweets
+s3_bucketname = tweets.archive.mybucket
+```
 
 # Errors
 If the program emits a "Twitter API Access Error: 4xx" Twitter is rejecting the connection.
@@ -29,9 +43,4 @@ If the program emits a "Twitter API Access Error: 4xx" Twitter is rejecting the 
 Code 401 means "Missing or incorrect authentication credentials. This may also [be] returned in other undefined circumstances." which probably means there is an error in the configuration keys.
 
 All response codes should be documented here: https://developer.twitter.com/en/docs/basics/response-codes.html
-
-
-# Future Work
-
-Future updates will include an option to automatically push output directly to S3 buckets reducing storage needs for the collector instance to less than 100MB (well within a t2.nano instance).
 
