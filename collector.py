@@ -3,6 +3,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler, Stream
 
 import json
+import time
 import configparser
 from datetime import datetime
 
@@ -31,6 +32,7 @@ class TwitterListener(StreamListener):
             print(" * s3_bucketname: %s" % bucket_name)
             self.s3 = True
             self.bucket = bucket_name
+        self.backoff_in_seconds = 1
 
     def close_file(self):
         self.outfile.close()
@@ -44,6 +46,7 @@ class TwitterListener(StreamListener):
             uploader_thread.start()
 
     def on_data(self, data):
+        self.backoff_in_seconds = 1
         self.outfile.write(data)
         self.tweet_count += 1
 
@@ -94,13 +97,21 @@ if __name__ == '__main__':
 
     stream = Stream(auth, twitter_listener)
 
-    try:
-        print(" * Tracker String: %s" % tracker_string)
-        stream.filter(track=[tracker_string])
-    except KeyboardInterrupt:
-        print(twitter_listener.__dict__.keys())
-        twitter_listener.close_file()
-        print("Clean shutdown successful!")
-    except:
-        raise
-
+    backoff_in_seconds = 1
+    while backoff_in_seconds < 65:
+        try:
+            print(" * Tracker String: %s" % tracker_string)
+            stream.filter(track=[tracker_string])
+        except KeyboardInterrupt:
+            print(twitter_listener.__dict__.keys())
+            twitter_listener.close_file()
+            print("Clean shutdown successful!")
+            exit(0)
+        except ConnectionResetError:
+            print(
+                "Connection reset by host, retrying in %d seconds.",
+                twitter_listener.backoff_in_seconds)
+            time.sleep(twitter_listener.backoff_in_seconds)
+            twitter_listener.backoff_in_seconds *= 2
+        except:
+            raise
