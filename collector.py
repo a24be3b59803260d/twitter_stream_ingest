@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     try:
         print(" * Tracker String: %s" % tracker_string)
-        stream.filter(track=tracker_string)
+        stream.filter(track=[tracker_string])
     except KeyboardInterrupt:
         print(twitter_listener.__dict__.keys())
         twitter_listener.close_file()
