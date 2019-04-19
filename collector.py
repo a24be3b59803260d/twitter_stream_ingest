@@ -6,6 +6,8 @@ import json
 import time
 import configparser
 from datetime import datetime
+from urllib3.exceptions import ProtocolError as UrlLibProtocolError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from s3_uploader import BucketUploader
 
@@ -77,12 +79,14 @@ if __name__ == '__main__':
     twitter_listener = None
 
     # check for S3 configuration, enable if present
-    try:
+    s3_bucketname = config['io'].get('s3_bucketname', None)
+
+    if s3_bucketname:
         twitter_listener = TwitterListener(
             outfile,
             target_count,
-            config['io'].get('s3_bucketname'))
-    except:
+            s3_bucketname)
+    else:
         print("[!] No S3 bucket name found, running in local archive mode.")
         twitter_listener = TwitterListener(
             outfile,
@@ -103,13 +107,13 @@ if __name__ == '__main__':
             print(" * Tracker String: %s" % tracker_string)
             stream.filter(track=[tracker_string])
         except KeyboardInterrupt:
-            print(twitter_listener.__dict__.keys())
+            print("Shutting down listener...")
             twitter_listener.close_file()
             print("Clean shutdown successful!")
             exit(0)
-        except ConnectionResetError:
+        except (UrlLibProtocolError, RequestsConnectionError):
             print(
-                "Connection reset by host, retrying in %d seconds.",
+                "Connection reset by host, retrying in %d seconds." %
                 twitter_listener.backoff_in_seconds)
             time.sleep(twitter_listener.backoff_in_seconds)
             twitter_listener.backoff_in_seconds *= 2
