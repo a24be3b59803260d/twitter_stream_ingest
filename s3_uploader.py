@@ -20,9 +20,9 @@ class BucketUploader(threading.Thread):
                 Body=open(self.filename, 'rb'))
 
             os.remove(self.filename)
+            print("Upload successful; removed file: %s" % self.filename)
         except:
-            print("An error occurred, leaving file '%s' on disk")
-        print("Upload successful; removed file: %s" % self.filename)
+            print("An error occurred, leaving file '%s' on disk" % self.filename)
 
 
 if __name__ == "__main__":
