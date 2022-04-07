@@ -54,7 +54,6 @@ class TwitterListener(Stream):
         if self.s3:
             # create uploader thread
             uploader_thread = BucketUploader(
-                self.bucket,
                 self.outfilename)
             uploader_thread.start()
 

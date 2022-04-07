@@ -23,10 +23,12 @@ rolling new file at /tmp/maga_qanon_20190304-123240_raw_tweets.jsonl
 ```
 Using **screen** or **nohup** will allow the collector script to run unattended.
 
-# AWS S3 Integration
-Output may be directed to AWS S3 instead of the local disk (enabling use of a tiny collector VM) by adding the **s3_bucketname** key to the __[io]__ section of the __collector.cfg__ file and configuring local AWS credentials that have permission to write to the specified bucket. The value of the __s3_bucketname__ key should be the bucket name without the ARN prefix.
+# S3 Integration
+Output may be directed to an S3 capable API instead of the local disk (enabling use of a tiny collector VM) by adding the **s3_bucketname** key to the __[io]__ section of the __collector.cfg__ file and configuring credentials that have permission to write to the specified bucket. The value of the __s3_bucketname__ key should be the bucket name without the ARN prefix.
 
 AWS CLI configuration steps can be found here: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
+
+Any S3 compatible storage API can be configured by setting the **access_key**, **secret_access_key**, and **endpoint_url** keys in the __[io]__ section.
 
 An example updated __[io]__ section appears below:
 ```
@@ -35,6 +37,9 @@ outfile = /tmp/twitter_archive/interesting_tweets
 target_count = 1000
 tracker_string = #interesting,#tweets
 s3_bucketname = tweets.archive.mybucket
+access_key = 0000000000000000000000000
+secret_access_key = KEYAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+endpoint_url = https://s3.us-west-000.backblazeb2.com
 ```
 
 # Errors
