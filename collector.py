@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # from tweepy.streaming import StreamingClient
-from tweepy import OAuthHandler, Stream
+from tweepy import Stream
+from tweepy import OAuthHandler, API
 
 import json
 import time
@@ -8,6 +9,7 @@ import configparser
 from datetime import datetime
 from urllib3.exceptions import ProtocolError as UrlLibProtocolError
 from requests.exceptions import ConnectionError as RequestsConnectionError
+from os.path import exists
 
 from s3_uploader import BucketUploader
 
@@ -86,6 +88,7 @@ if __name__ == '__main__':
     outfile = config['io'].get('outfile')
     target_count = config['io'].getint('target_count')
     tracker_string = config['io'].get('tracker_string')
+    follow_file = config['io'].get('follow_file')
 
     twitter_listener = None
 
@@ -96,6 +99,28 @@ if __name__ == '__main__':
     consumer_secret = config['twitter'].get('consumer_secret')
     access_token = config['twitter'].get('access_token')
     access_token_secret = config['twitter'].get('access_token_secret')
+
+    userids_list = list()
+    if exists(follow_file):
+        with open(follow_file, 'r') as f:
+            userids = list()
+            userstrings = f.read().split("\n")
+
+            auth = OAuthHandler(
+                consumer_key=consumer_key,
+                consumer_secret=consumer_secret,
+                access_token=access_token,
+                access_token_secret=access_token_secret)
+
+            api = API(auth)
+
+            for user in userstrings:
+                userids.append(
+                    str(api.get_user(screen_name=user).id)
+                )
+
+            if userids:
+                userids_list = ",".join(userids)
 
     twitter_listener = TwitterListener(
         consumer_key,
@@ -115,7 +140,12 @@ if __name__ == '__main__':
     while backoff_in_seconds < 65:
         try:
             print("Starting listener...")
-            twitter_listener.filter(track=[tracker_string])
+            if tracker_string or userids_list:
+                twitter_listener.filter(track=[tracker_string], follow=[userids_list])
+            else:
+                print("Missing or invalid track or follow params.")
+                exit(0)
+
         except KeyboardInterrupt:
             print("Shutting down listener...")
             twitter_listener.close_file()
