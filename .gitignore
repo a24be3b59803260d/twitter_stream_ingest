@@ -1,3 +1,5 @@
 __pycache__
 collector.cfg
 .env
+follow.txt
+follow_ids.txt
