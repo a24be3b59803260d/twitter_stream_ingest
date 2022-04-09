@@ -61,13 +61,13 @@ def extract_to_file(tweetsfilename, featuresfilename):
                         write_feature_row(writer, common_features, 'retweet', s, 'symbol')
 
 def write_feature_row(w, common, action, entity, entity_type):
-    w.writerow(
-        {
-            'action': action,
-            'entity': entity,
-            'entity_type': entity_type
-        } | common
-    )
+    tmp_dict = dict()
+    for k in common:
+        tmp_dict[k] = common[k]
+    tmp_dict['action'] = action
+    tmp_dict['entity'] = entity
+    tmp_dict['entity_type'] = entity_type
+    w.writerow(tmp_dict)
 
 
 if __name__ == "__main__":

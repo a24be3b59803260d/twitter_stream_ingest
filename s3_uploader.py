@@ -60,7 +60,7 @@ class BucketUploader(threading.Thread):
                 print("Upload successful; preserving file: %s" % filename)
 
         except BaseException as err:
-            print(f"Unexpected {err=}, {type(err)=}")
+            print(f"Unexpected {err}, {type(err)}")
             print("An error occurred, leaving file '%s' on disk" % self.filename)
             raise
 
