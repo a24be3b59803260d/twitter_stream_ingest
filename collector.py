@@ -12,6 +12,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from os.path import exists
 
 from s3_uploader import BucketUploader
+from feature_extractor import extract_to_file
 
 
 class TwitterListener(Stream):
@@ -27,7 +28,9 @@ class TwitterListener(Stream):
             consumer_secret,
             access_token,
             access_token_secret,
-            prefix, target_count, bucket_name=None):
+            prefix,
+            target_count,
+            bucket_name=None):
         super().__init__(
             consumer_key,
             consumer_secret,
@@ -56,7 +59,8 @@ class TwitterListener(Stream):
         if self.s3:
             # create uploader thread
             uploader_thread = BucketUploader(
-                self.outfilename)
+                self.outfilename,
+                extract_to_file) # Optional feature extraction function
             uploader_thread.start()
 
     def on_data(self, data):
