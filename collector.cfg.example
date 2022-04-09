@@ -13,3 +13,4 @@ access_key = S3_ACCESS_KEY
 secret_access_key = S3_SECRET_ACCESS_KEY
 endpoint_url = https://s3.us-west-000.backblazeb2.com
 follow_file = follow.txt
+follow_file = follow_ids.txt

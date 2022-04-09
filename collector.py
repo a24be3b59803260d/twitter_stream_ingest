@@ -5,6 +5,7 @@ from tweepy import OAuthHandler, API
 
 import json
 import time
+import csv
 import configparser
 from datetime import datetime
 from urllib3.exceptions import ProtocolError as UrlLibProtocolError
@@ -93,6 +94,7 @@ if __name__ == '__main__':
     target_count = config['io'].getint('target_count')
     tracker_string = config['io'].get('tracker_string')
     follow_file = config['io'].get('follow_file')
+    follow_id_file = config['io'].get('follow_id_file')
 
     twitter_listener = None
 
@@ -104,9 +106,18 @@ if __name__ == '__main__':
     access_token = config['twitter'].get('access_token')
     access_token_secret = config['twitter'].get('access_token_secret')
 
+    # load the known follow_ids
+    user_id_map = dict()
+    if exists(follow_id_file):
+        with open(follow_id_file) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                user_id_map[row['user']] = row['id']
+
     userids_list = list()
     if exists(follow_file):
         with open(follow_file, 'r') as f:
+
             userids = list()
             userstrings = f.read().split("\n")
 
@@ -119,9 +130,19 @@ if __name__ == '__main__':
             api = API(auth)
 
             for user in userstrings:
-                userids.append(
-                    str(api.get_user(screen_name=user).id)
-                )
+                if user not in user_id_map:
+                    try:
+                        user_id = api.get_user(screen_name=user).id
+                        userids.append(
+                            str(user_id)
+                        )
+                        user_id_map[user] = user_id
+                        print(f"Got user id {user_id} for '{user}'.")
+                    except:
+                        print(f"Failed to get id for: {user}")
+
+            for userid in user_id_map.values():
+                userids.append(userid)
 
             if userids:
                 userids_list = ",".join(userids)
@@ -139,6 +160,7 @@ if __name__ == '__main__':
         print("[!] No S3 bucket name found, running in local archive mode.")
 
     print(" * Tracker String: %s" % tracker_string)
+    print(" * Follow String: %s" % userids_list)
 
     backoff_in_seconds = 1
     while backoff_in_seconds < 65:
