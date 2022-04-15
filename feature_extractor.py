@@ -59,7 +59,7 @@ def extract_to_file(tweetsfilename, featuresfilename):
                             tld = tldextract.extract(url['expanded_url'])
                             write_feature_row(writer, common_features, 'retweet', tld.fqdn, 'tld')
                         for s in tweet['retweeted_status']['entities']['symbols']:
-                            write_feature_row(writer, common_features, 'retweet', s, 'symbol')
+                            write_feature_row(writer, common_features, 'retweet', s['text'], 'symbol')
 
                 except:
                     print(f"Error extracting from the following tweet:")
